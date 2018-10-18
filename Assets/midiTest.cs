@@ -2,29 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 using AlsaSharp;
-using System.Threading;
+using LambMidi.Input;
 public class midiTest : MonoBehaviour {
-    byte[] m_data = new byte[3];
-    int m_Start = -1;
-    int m_len = -1;
-
-    public void Listening ()
-    {
-        using (var seq = new AlsaSequencer (AlsaIOType.Input, AlsaIOMode.NonBlocking)) {
-			AlsaClientInfo clientInfo = new AlsaClientInfo { Client = -1 };
-			while(seq.QueryNextClient(clientInfo)){
-				print(clientInfo.Name + " ID:\t" + clientInfo.PortCount);
-			}
-		}
-		
-	}
-				
+    [SerializeField]
+    MidiListener listener;
     void Start(){
-        Listening();
+     listener.OnMessageRecieved += printmessage;
+     listener.StartListening();
+     Debug.Log(listener.isListening);   
     }
-    void Update(){
-       
+    void OnDisable(){
+        listener.StopListening();
     }
-
+    void printmessage(ChannelMessage cm){
+        string res = "";
+        foreach(var d in cm.data){
+            res += d + " ";
+        }
+        print(res);
+        //print(cm.length + " " + cm.start);
+    }
 
 }
